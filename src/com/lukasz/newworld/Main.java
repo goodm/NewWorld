@@ -5,6 +5,7 @@ import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
@@ -87,7 +88,8 @@ public class Main extends Activity implements OnScaleGestureListener
 		
 		if(me.getPointerCount() == 1)
 		{		
-
+			render.move = true;
+			
 			if (me.getAction() == MotionEvent.ACTION_DOWN) 
 			{
 				if(reset == false)
@@ -101,19 +103,19 @@ public class Main extends Activity implements OnScaleGestureListener
 
 			if (me.getAction() == MotionEvent.ACTION_UP) 
 			{
+				render.move = false;
 				reset = false;
-				render.moveX = 0;
-				render.moveY = 0;
 				xpos = 0;
 				ypos = 0;
+				render.moveX = 0;
+				render.moveY = 0;
 				return true;
 			}
 
 			if (me.getAction() == MotionEvent.ACTION_MOVE) 
 			{
-				render.moveX = (int) (me.getX() - xpos)/50;
-				render.moveY = (int) (ypos - me.getY())/50;
-				
+				render.moveX = (int) (me.getX() - xpos);
+				render.moveY = (int) (ypos - me.getY());				
 				return true;
 			}
 		}
@@ -173,9 +175,21 @@ public class Main extends Activity implements OnScaleGestureListener
 	public void onScaleEnd(ScaleGestureDetector detector) 
 	{
 		render.move = false;
-		touch = 0;
-		render.moveX = 0;
-		render.moveY = 0;	
 		reset = false;
+	}
+	
+    
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) 
+	{
+	    if (keyCode == KeyEvent.KEYCODE_BACK) 
+	    {
+	    	finish();
+	    	mGLView.onPause();
+	    	mGLView.destroyDrawingCache();
+	    	mGLView.postInvalidate();
+	    	render.stop();
+	    }
+	    return false;
 	}
 }

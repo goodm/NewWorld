@@ -71,29 +71,13 @@ class MyRender implements GLSurfaceView.Renderer
 		
 		Texture.defaultToMipmapping(true);
 		Texture.defaultTo4bpp(true);
-	}
-
-	public void stop() {
-		stop = true;
-	}
-
-	public void onSurfaceChanged(GL10 gl, int w, int h) 
-	{
-		if (fb != null) 
-		{
-			fb.dispose();
-		}
-
-		fb = new FrameBuffer(gl, w, h);
-		MemoryHelper.compact();				
-	}
-
-	public void onSurfaceCreated(GL10 gl, EGLConfig config) 
-	{			
+		
 		TextureManager tm = TextureManager.getInstance();
 		Texture rocky = new Texture(res.openRawResource(R.raw.cate));
 		Texture planetex = new Texture(res.openRawResource(R.raw.planetex));
-
+		
+		tm.flush();
+		
 		font = new Texture(res.openRawResource(R.raw.numbers));
 		font.setMipmap(false);
 
@@ -123,7 +107,7 @@ class MyRender implements GLSurfaceView.Renderer
 		thing.strip();
 
 		world.buildAllObjects();								
-		world.getCamera().setPosition(0, -500, 0);
+		world.getCamera().setPosition(xpos, -1000-scale, ypos);
 		sun = new Light(world);
 		sun.setIntensity(250, 250, 250);
 
@@ -131,6 +115,26 @@ class MyRender implements GLSurfaceView.Renderer
 		sv.set(plane.getTransformedCenter());
 		sv.z = 100;
 		sun.setPosition(sv);
+	}
+
+	public void stop() {
+		stop = true;
+	}
+
+	public void onSurfaceChanged(GL10 gl, int w, int h) 
+	{
+		if (fb != null) 
+		{
+			fb.dispose();
+		}
+
+		fb = new FrameBuffer(gl, w, h);
+		MemoryHelper.compact();				
+	}
+
+	public void onSurfaceCreated(GL10 gl, EGLConfig config) 
+	{			
+
 	}
 	
 	public void onDrawFrame(GL10 gl) 
@@ -145,16 +149,23 @@ class MyRender implements GLSurfaceView.Renderer
                 world.getCamera().rotateZ((float)Math.toRadians(0));
                 world.getCamera().rotateX((float)Math.toRadians(-90));
                 world.getCamera().rotateY((float)Math.toRadians(0));
-				
-                xpos = xpos - moveX;
-                ypos = ypos - moveY;
-                Log.d("SCALE",String.valueOf(scale));							
-				
-                if(move == true)
+
+            	if(Math.floor(xpos) != Math.floor(xpos-moveX))
+            	{
+            		xpos -= moveX/50;
+            	}
+            	
+            	if(Math.floor(ypos) != Math.floor(ypos-moveY))
+            	{
+            		ypos -= moveY/50;
+            	}
+                
+                if(move == true)                	
                 {
-                	world.getCamera().setPosition(xpos, -500 + scale, ypos);
+                	world.getCamera().setPosition(xpos, -1000-scale, ypos);
                 }
-				
+
+                
 				fb.clear(back);
 				world.renderScene(fb);
 				world.draw(fb);
